@@ -1,0 +1,30 @@
+{
+  "name": "e621-discord-bot",
+  "version": "0.0.2",
+  "description": "A discord bot for e621",
+  "main": "index.js",
+  "directories": {
+    "lib": "lib"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/LilithTundrus/e621-Discord-Bot.git"
+  },
+  "keywords": [
+    "e621",
+    "discord",
+    "bot",
+    "api",
+    "nsfw",
+    "furry"
+  ],
+  "author": "Lilith Tundrus",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/LilithTundrus/e621-Discord-Bot/issues"
+  },
+  "homepage": "https://github.com/LilithTundrus/e621-Discord-Bot#readme"
+}

@@ -1,1 +1,1 @@
-# e621-Discord-Bot
+# e621-discord-bot
