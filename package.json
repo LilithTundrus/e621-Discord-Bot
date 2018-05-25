@@ -26,5 +26,9 @@
   "bugs": {
     "url": "https://github.com/LilithTundrus/e621-Discord-Bot/issues"
   },
-  "homepage": "https://github.com/LilithTundrus/e621-Discord-Bot#readme"
+  "homepage": "https://github.com/LilithTundrus/e621-Discord-Bot#readme",
+  "dependencies": {
+    "@types/node": "^10.1.2",
+    "discord.js": "^11.3.2"
+  }
 }
