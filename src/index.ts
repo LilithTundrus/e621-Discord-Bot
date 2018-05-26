@@ -1,7 +1,9 @@
+'use strict';
+// JS only module
+const { FieldsEmbed: FieldsEmbedMode } = require('discord-paginationembed');
 
 import * as Discord from 'discord.js';
-import { MessageEmbed } from 'discord.js'
-const { FieldsEmbed: FieldsEmbedMode } = require('discord-paginationembed');
+import { MessageEmbed } from 'discord.js';
 import e621 from 'e621-api';
 import Logger from 'colorful-log-levels';
 // Get our config variables (as opposed to ENV variables)
@@ -83,18 +85,20 @@ client.on('message', async message => {
                 .then((response) => {
                     let testArray = [];
 
-                    for (let i = 0; i < 5; ++i)
-                        embeds.push(new MessageEmbed().addField('Page', i + 1));
+                    for (let i = 0; i < response.length; ++i)
+                        testArray.push({ name: response[i].file_url })
 
                     new FieldsEmbedMode()
-                        .setArray([{ name: response[0].file_url }, { name: response[1].file_url }])
+                        .setArray(testArray)
                         .setAuthorizedUser(message.author)
                         .setChannel(message.channel)
                         .setElementsPerPage(1)
                         .setPage(1)
-                        .setImage()
+                        .setImage(response[0].file_url)
+                        .setColor(0xFF00AE)
+                        .addBlankField()
                         .showPageIndicator(false)
-                        .formatField('Ur', i => i.name)
+                        .formatField('Url', i => i.name)
                         .build();
                 })
         default:
