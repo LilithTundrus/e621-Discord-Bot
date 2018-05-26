@@ -3,7 +3,7 @@ import * as Discord from 'discord.js';
 import e621 from 'e621-api';
 import Logger from 'colorful-log-levels';
 // Get our config variables (as opposed to ENV variables)
-import { ver, prod, debug, botToken, prefix } from './config';
+import { ver, prod, debug, botToken, prefix, adminID } from './config';
 import { logLevels } from 'colorful-log-levels/enums';
 
 // Create an instance of a Discord client
@@ -15,21 +15,18 @@ const wrapper = new e621('e621DiscordBot0.0.1', null, null, 3);
 
 client.on('ready', () => {
     logger.info(`Connected to Discord.\nLogged in as ${client.user.username} (${client.user.id})`);
-    client.user.setPresence({
-        status: 'online',
-        game: { name: 'e621', },
-    })
+    client.user.setActivity(`Serving ${client.guilds.size} servers`);
 });
 
-client.on("guildCreate", guild => {
+client.on('guildCreate', guild => {
     // This event triggers when the bot joins a guild.
     console.log(`New guild joined: ${guild.name} (id: ${guild.id}). This guild has ${guild.memberCount} members!`);
     client.user.setActivity(`Serving ${client.guilds.size} servers`);
 });
 
-client.on("guildDelete", guild => {
+client.on('guildDelete', guild => {
     // this event triggers when the bot is removed from a guild.
-    console.log(`I have been removed from: ${guild.name} (id: ${guild.id})`);
+    console.log(`Bot removed from: ${guild.name} (id: ${guild.id})`);
     client.user.setActivity(`Serving ${client.guilds.size} servers`);
 });
 
@@ -42,30 +39,36 @@ client.on('message', async message => {
     if (message.author.bot) return;
 
     // Also good practice to ignore any message that does not start with our prefix, 
-    // which is set in the configuration file.
     if (message.content.indexOf(prefix) !== 0) return;
 
-    // Here we separate our "command" name, and our "arguments" for the command. 
-    // e.g. if we have the message "+say Is this the real life?" , we'll get the following:
+    // Here we separate our 'command' name, and our 'arguments' for the command. 
+    // e.g. if we have the message '+say Is this the real life?' , we'll get the following:
     // command = say
-    // args = ["Is", "this", "the", "real", "life?"]
+    // args = ['Is', 'this', 'the', 'real', 'life?']
     const args = message.content.slice(prefix.length).trim().split(/ +/g);
     const command = args.shift().toLowerCase();
 
     if (command === 'ping') {
         // Calculates ping between sending a message and editing it, giving a nice round-trip latency.
         // The second ping is an average latency between the bot and the websocket server (one-way, not round-trip)
-        const m: any = await message.channel.send("Ping?");
+        const m: any = await message.channel.send('Ping?');
         m.edit(`Pong! Latency is ${m.createdTimestamp - message.createdTimestamp}ms. API Latency is ${Math.round(client.ping)}ms`);
     }
 
     if (command === 'test') {
         return wrapper.posts.getPopularPosts(0)
-        .then((response) => {
-            message.channel.send(response[0].file_url)
-        })
+            .then((response) => {
+                message.channel.send(response[0].file_url)
+            })
     }
 
+});
+
+client.on('error', async error => {
+    logger.error(error);
+    client.user.sendMessage(JSON.stringify(error), {
+        reply: adminID
+    });
 });
 
 // Log our bot in
