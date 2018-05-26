@@ -1,6 +1,6 @@
 'use strict';
 // JS only module
-const { FieldsEmbed: FieldsEmbedMode } = require('discord-paginationembed');
+const { Embeds: EmbedsMode, FieldsEmbed: FieldsEmbedMode } = require('discord-paginationembed');
 
 import * as Discord from 'discord.js';
 import { MessageEmbed } from 'discord.js';
@@ -83,22 +83,29 @@ client.on('message', async message => {
         case 'page2':
             return wrapper.posts.getPopularPosts(0)
                 .then((response) => {
-                    let testArray = [];
-
+                    let embeds = [];
                     for (let i = 0; i < response.length; ++i)
-                        testArray.push({ name: response[i].file_url })
 
-                    new FieldsEmbedMode()
-                        .setArray(testArray)
+                        embeds.push(new Discord.RichEmbed().setImage(response[i].file_url));
+
+                    const myImage = message.author.avatarURL;
+
+                    new EmbedsMode()
+                        .setArray(embeds)
                         .setAuthorizedUser(message.author)
                         .setChannel(message.channel)
-                        .setElementsPerPage(1)
-                        .setPage(1)
-                        .setImage(response[0].file_url)
-                        .setColor(0xFF00AE)
-                        .addBlankField()
-                        .showPageIndicator(false)
-                        .formatField('Url', i => i.name)
+                        .showPageIndicator(true)
+                        .setPage(3)
+                        // .setImage(myImage) // Methods here and below are for customising all embeds
+                        // .setThumbnail(myImage)
+                        // .setTitle('Test Title')
+                        // .setDescription('Test Description')
+                        // .setFooter('Test Footer Text')
+                        // .setURL(myImage)
+                        // .setColor(0xFF00AE)
+                        // .addBlankField()
+                        // .addField('Test Field 1', 'Test Field 1', true)
+                        // .addField('Test Field 2', 'Test Field 2', true)
                         .build();
                 })
         default:
