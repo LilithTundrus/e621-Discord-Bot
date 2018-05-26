@@ -30,7 +30,7 @@
   "dependencies": {
     "@types/node": "^10.1.2",
     "colorful-log-levels": "^0.2.0",
-    "discord-paginationembed": "github:gazmull/discord-paginationembed",
+    "discord-paginationembed": "github:gazmull/discord-paginationembed#v11",
     "discord.js": "^11.3.2",
     "e621-api": "^0.3.7"
   }

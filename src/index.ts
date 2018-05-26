@@ -1,5 +1,7 @@
 
 import * as Discord from 'discord.js';
+import { MessageEmbed } from 'discord.js'
+const { FieldsEmbed: FieldsEmbedMode } = require('discord-paginationembed');
 import e621 from 'e621-api';
 import Logger from 'colorful-log-levels';
 // Get our config variables (as opposed to ENV variables)
@@ -65,8 +67,36 @@ client.on('message', async message => {
                 .then((response) => {
                     message.channel.send(response[0].file_url)
                 })
+        case 'pagey':
+            new FieldsEmbedMode()
+                .setArray([{ name: 'John Doe' }, { name: 'Jane Doe' }])
+                .setAuthorizedUser(message.author)
+                .setChannel(message.channel)
+                .setElementsPerPage(1)
+                .setPage(2)
+                .showPageIndicator(false)
+                .formatField('Name', i => i.name)
+                .build();
             break;
+        case 'page2':
+            return wrapper.posts.getPopularPosts(0)
+                .then((response) => {
+                    let testArray = [];
 
+                    for (let i = 0; i < 5; ++i)
+                        embeds.push(new MessageEmbed().addField('Page', i + 1));
+
+                    new FieldsEmbedMode()
+                        .setArray([{ name: response[0].file_url }, { name: response[1].file_url }])
+                        .setAuthorizedUser(message.author)
+                        .setChannel(message.channel)
+                        .setElementsPerPage(1)
+                        .setPage(1)
+                        .setImage()
+                        .showPageIndicator(false)
+                        .formatField('Ur', i => i.name)
+                        .build();
+                })
         default:
         // this maybe can be ignored or can given an error of unknown command
     }
