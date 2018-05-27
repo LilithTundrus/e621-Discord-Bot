@@ -68,24 +68,7 @@ client.on('message', async message => {
             m.edit(`Pong! Latency is ${m.createdTimestamp - message.createdTimestamp}ms. API Latency is ${Math.round(client.ping)}ms`);
             break;
         case 'popular':
-            return wrapper.posts.getPopularPosts(0)
-                .then((response) => {
-                    let embeds = [];
-                    for (let i = 0; i < response.length; ++i) {
-                        let embedPage = new Discord.RichEmbed().setImage(response[i].file_url);
-                        embeds.push(embedPage);
-                    }
-
-                    const myImage = message.author.avatarURL;
-
-                    new EmbedsMode()
-                        .setArray(embeds)
-                        .setAuthorizedUser(message.author)
-                        .setChannel(message.channel)
-                        .showPageIndicator(true)
-                        .setPage(1)
-                        .build();
-                })
+            return popularCommandHandler(message, args);
         default:
         // this maybe can be ignored or can given an error of unknown command
     }
@@ -100,3 +83,29 @@ client.on('error', async error => {
 
 // Log our bot in
 client.login(botToken);
+
+
+function popularCommandHandler(discordMessage: Discord.Message, args: string[]) {
+    // parse for the arguments to choose the popularity enum
+    logger.debug(`${args}`)
+    if(!args) {
+        // send a fancy embed message
+        discordMessage.channel.send(``)
+    }
+    return wrapper.posts.getPopularPosts(0)
+        .then((response) => {
+            let embeds = [];
+            for (let i = 0; i < response.length; ++i) {
+                let embedPage = new Discord.RichEmbed().setImage(response[i].file_url);
+                embeds.push(embedPage);
+            }
+
+            new EmbedsMode()
+                .setArray(embeds)
+                .setAuthorizedUser(discordMessage.author)
+                .setChannel(discordMessage.channel)
+                .showPageIndicator(true)
+                .setPage(1)
+                .build();
+        })
+}
