@@ -58,6 +58,9 @@ client.on('message', async message => {
     const command = args.shift().toLowerCase();
 
     switch (command) {
+        case 'help':
+            //display the help file
+            break;
         case 'ping':
             // Calculates ping between sending a message and editing it, giving a nice round-trip latency.
             // The second ping is an average latency between the bot and the websocket server (one-way, not round-trip)
@@ -67,26 +70,11 @@ client.on('message', async message => {
         case 'popular':
             return wrapper.posts.getPopularPosts(0)
                 .then((response) => {
-                    message.channel.send(response[0].file_url)
-                })
-        case 'pagey':
-            new FieldsEmbedMode()
-                .setArray([{ name: 'John Doe' }, { name: 'Jane Doe' }])
-                .setAuthorizedUser(message.author)
-                .setChannel(message.channel)
-                .setElementsPerPage(1)
-                .setPage(2)
-                .showPageIndicator(false)
-                .formatField('Name', i => i.name)
-                .build();
-            break;
-        case 'page2':
-            return wrapper.posts.getPopularPosts(0)
-                .then((response) => {
                     let embeds = [];
-                    for (let i = 0; i < response.length; ++i)
-
-                        embeds.push(new Discord.RichEmbed().setImage(response[i].file_url));
+                    for (let i = 0; i < response.length; ++i) {
+                        let embedPage = new Discord.RichEmbed().setImage(response[i].file_url);
+                        embeds.push(embedPage);
+                    }
 
                     const myImage = message.author.avatarURL;
 
@@ -95,17 +83,7 @@ client.on('message', async message => {
                         .setAuthorizedUser(message.author)
                         .setChannel(message.channel)
                         .showPageIndicator(true)
-                        .setPage(3)
-                        // .setImage(myImage) // Methods here and below are for customising all embeds
-                        // .setThumbnail(myImage)
-                        // .setTitle('Test Title')
-                        // .setDescription('Test Description')
-                        // .setFooter('Test Footer Text')
-                        // .setURL(myImage)
-                        // .setColor(0xFF00AE)
-                        // .addBlankField()
-                        // .addField('Test Field 1', 'Test Field 1', true)
-                        // .addField('Test Field 2', 'Test Field 2', true)
+                        .setPage(1)
                         .build();
                 })
         default:
