@@ -48,8 +48,7 @@ client.on('message', async message => {
 
     // It's good practice to ignore other bots. This also makes your bot ignore itself
     if (message.author.bot) return;
-
-    // Also good practice to ignore any message that does not start with our prefix, 
+    // Also good practice to ignore any message that does not start with the bot'ss prefix, 
     if (message.content.indexOf(prefix) !== 0) return;
 
     // Here we separate our 'command' name, and our 'arguments' for the command. 
@@ -69,16 +68,17 @@ client.on('message', async message => {
         case 'popular':
             return popularCommandHandler(message, args);
         case 'stats':
+            // admin-only stats command
             return statsCommandHandler(message, args)
         default:
-            // this maybe can be ignored or can given an error of unknown command
+            // if command character + unknown command is given we at least need to let the user know
             return message.channel.send(`Uknown command: **${command}**`);
     }
 });
 
 client.on('error', async error => {
     logger.error(error);
-    client.user.sendMessage(JSON.stringify(error.message), {
+    client.user.sendMessage(JSON.stringify(error.message, null, 2), {
         reply: adminID
     });
 });
@@ -93,10 +93,14 @@ function helpCommandHandler(discordMessage: Discord.Message, args: string[]) {
 // TODO: have this take a daily/weekly/monthly arguments
 function popularCommandHandler(discordMessage: Discord.Message, args: string[]) {
     // parse for the arguments to choose the popularity enum
-    logger.debug(`${args}`)
+    logger.debug(`${args}`);
     if (!args) {
-        // send a fancy embed message
-        discordMessage.channel.send(``)
+        // send a fancy embed error message
+        // TODO: make this error embed a callable function to autofill and return 
+        // a special error embed
+        let errorEmbed = new Discord.RichEmbed();
+
+        discordMessage.channel.send(errorEmbed);
     }
     return wrapper.posts.getPopularPosts(0)
         .then((response) => {
