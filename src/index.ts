@@ -1,5 +1,5 @@
 'use strict';
-// JS only module
+// JS only module ( annoying but it needs to be like that)
 const { Embeds: EmbedsMode, FieldsEmbed: FieldsEmbedMode } = require('discord-paginationembed');
 
 import * as Discord from 'discord.js';
@@ -22,7 +22,6 @@ The main goal of this bot right now is to get a
 set of popular posts for e621 through the wrapped API
 
 Eventually it should also allow a schedule to be set to post popular images of the day
-
 */
 
 client.on('ready', () => {
@@ -47,7 +46,6 @@ client.on('message', async message => {
     // This event will run on every single message received, from any channel or DM.
 
     // It's good practice to ignore other bots. This also makes your bot ignore itself
-    // and not get into a spam loop
     if (message.author.bot) return;
 
     // Also good practice to ignore any message that does not start with our prefix, 
@@ -59,8 +57,8 @@ client.on('message', async message => {
 
     switch (command) {
         case 'help':
-            //display the help file
-            break;
+            // Display the help file
+            return helpCommandHandler(message, args);
         case 'ping':
             // Calculates ping between sending a message and editing it, giving a nice round-trip latency.
             // The second ping is an average latency between the bot and the websocket server (one-way, not round-trip)
@@ -70,7 +68,8 @@ client.on('message', async message => {
         case 'popular':
             return popularCommandHandler(message, args);
         default:
-        // this maybe can be ignored or can given an error of unknown command
+            // this maybe can be ignored or can given an error of unknown command
+            return message.channel.send(`Uknown command: **${command}**`);
     }
 });
 
@@ -81,14 +80,13 @@ client.on('error', async error => {
     });
 });
 
-// Log our bot in
+// Log the bot in
 client.login(botToken);
-
 
 function popularCommandHandler(discordMessage: Discord.Message, args: string[]) {
     // parse for the arguments to choose the popularity enum
     logger.debug(`${args}`)
-    if(!args) {
+    if (!args) {
         // send a fancy embed message
         discordMessage.channel.send(``)
     }
@@ -108,4 +106,8 @@ function popularCommandHandler(discordMessage: Discord.Message, args: string[]) 
                 .setPage(1)
                 .build();
         })
+}
+
+function helpCommandHandler(discordMessage: Discord.Message, args: string[]) {
+    return discordMessage.channel.send('Test');
 }
