@@ -2,6 +2,7 @@
 // JS only module ( annoying but it needs to be like that)
 const { Embeds: EmbedsMode, FieldsEmbed: FieldsEmbedMode } = require('discord-paginationembed');
 
+import * as os from 'os';
 import * as Discord from 'discord.js';
 import { MessageEmbed } from 'discord.js';
 import e621 from 'e621-api';
@@ -67,6 +68,8 @@ client.on('message', async message => {
             break;
         case 'popular':
             return popularCommandHandler(message, args);
+        case 'stats':
+            return statsCommandHandler(message, args)
         default:
             // this maybe can be ignored or can given an error of unknown command
             return message.channel.send(`Uknown command: **${command}**`);
@@ -75,7 +78,7 @@ client.on('message', async message => {
 
 client.on('error', async error => {
     logger.error(error);
-    client.user.sendMessage(JSON.stringify(error), {
+    client.user.sendMessage(JSON.stringify(error.message), {
         reply: adminID
     });
 });
@@ -83,6 +86,11 @@ client.on('error', async error => {
 // Log the bot in
 client.login(botToken);
 
+function helpCommandHandler(discordMessage: Discord.Message, args: string[]) {
+    return discordMessage.channel.send('Test');
+}
+
+// TODO: have this take a daily/weekly/monthly arguments
 function popularCommandHandler(discordMessage: Discord.Message, args: string[]) {
     // parse for the arguments to choose the popularity enum
     logger.debug(`${args}`)
@@ -108,6 +116,17 @@ function popularCommandHandler(discordMessage: Discord.Message, args: string[]) 
         })
 }
 
-function helpCommandHandler(discordMessage: Discord.Message, args: string[]) {
-    return discordMessage.channel.send('Test');
+function statsCommandHandler(discordMessage: Discord.Message, args: string[]) {
+    // check if the user who called is an admin from the config file
+    if (discordMessage.author.id == adminID) {
+        // TODO: add more info to this like the destiny2 bot had
+        return discordMessage.channel.send(
+            `Version: ${ver} Running on server: ${os.type()} ${os.hostname()} ${os.platform()} ${os.cpus()[0].model}`);
+    } else {
+        // send a permission denied message
+        logger.auth(
+            `${discordMessage.author.username} (${discordMessage.author.id})
+            tried to use the 'stats' command at ${new Date().toTimeString()}`)
+        return discordMessage.channel.send(`Permission denied. Logging this access attempt.`);
+    }
 }
