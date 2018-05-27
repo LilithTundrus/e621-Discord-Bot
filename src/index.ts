@@ -94,15 +94,35 @@ function helpCommandHandler(discordMessage: Discord.Message, args: string[]) {
 function popularCommandHandler(discordMessage: Discord.Message, args: string[]) {
     // parse for the arguments to choose the popularity enum
     logger.debug(`${args}`);
-    if (!args) {
+    if (args.length == 0) {
         // send a fancy embed error message
-        // TODO: make this error embed a callable function to autofill and return 
-        // a special error embed
+        // TODO: make this error embed a callable function to autofill and return a special error embed
         let errorEmbed = new Discord.RichEmbed();
+        errorEmbed.title = 'Error';
+        errorEmbed.description = 'Please give an argument for the **popular** command(daily, weekly or monthly)';
 
-        discordMessage.channel.send(errorEmbed);
+        return discordMessage.channel.send(errorEmbed);
     }
-    return wrapper.posts.getPopularPosts(0)
+    // try and pull an arg from the arguments list (after the first doesn't matter)
+    let popularOption: number = 0;
+
+    switch (args[0]) {
+        case 'daily':
+            popularOption = 0;
+            break;
+        case 'weekly':
+            popularOption = 1;
+            break;
+        case 'monthly':
+            popularOption = 2;
+            break;
+        default:
+            let errorEmbed = new Discord.RichEmbed();
+            errorEmbed.title = 'Error';
+            errorEmbed.description = `Invalid popular command argument: ${args[0]}`;
+            return discordMessage.channel.send(errorEmbed);
+    }
+    return wrapper.posts.getPopularPosts(popularOption)
         .then((response) => {
             let embeds = [];
             for (let i = 0; i < response.length; ++i) {
