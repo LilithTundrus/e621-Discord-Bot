@@ -14,7 +14,7 @@ import { logLevels } from 'colorful-log-levels/enums';
 // Create an instance of a Discord client
 const client = new Discord.Client();
 // create a logger instance
-const logger = new Logger('../logs', logLevels.error, true)
+const logger = new Logger('../logs', logLevels.error, true);
 // create an e621 API instance
 const wrapper = new e621('e621DiscordBot0.0.1', null, null, 3);
 
@@ -34,6 +34,7 @@ client.on('guildCreate', guild => {
     // This event triggers when the bot joins a guild.
     logger.info(`New guild joined: ${guild.name} (id: ${guild.id}). This guild has ${guild.memberCount} members!`);
     client.user.setActivity(`Serving ${client.guilds.size} servers`);
+    // TODO: send a message to a channel parse from the guild info about the bot and what it can do
 });
 
 client.on('guildDelete', guild => {
@@ -42,9 +43,8 @@ client.on('guildDelete', guild => {
     client.user.setActivity(`Serving ${client.guilds.size} servers`);
 });
 
-// Create an event listener for messages
+// This event will run on every single message received, from any channel or DM.
 client.on('message', async message => {
-    // This event will run on every single message received, from any channel or DM.
 
     // It's good practice to ignore other bots. This also makes your bot ignore itself
     if (message.author.bot) return;
@@ -69,7 +69,7 @@ client.on('message', async message => {
             return popularCommandHandler(message, args);
         case 'stats':
             // admin-only stats command
-            return statsCommandHandler(message, args)
+            return statsCommandHandler(message, args);
         default:
             // if command character + unknown command is given we at least need to let the user know
             return message.channel.send(`Uknown command: **${command}**`);
@@ -126,7 +126,18 @@ function popularCommandHandler(discordMessage: Discord.Message, args: string[]) 
         .then((response) => {
             let embeds = [];
             for (let i = 0; i < response.length; ++i) {
-                let embedPage = new Discord.RichEmbed().setImage(response[i].file_url);
+                let embedPage = new Discord.RichEmbed();
+                embedPage.setImage(response[i].file_url);
+                embedPage.setThumbnail(response[i].preview_url);
+                let message =
+                    `**Direct link**: ${response[i].file_url}\nPost link: https://e621.net/post/show/${response[i].id}`;
+                embedPage.description = message;
+                embedPage.author = {
+                    name: client.user.username,
+                    url: 'https://e621.net',
+                    icon_url: client.user.defaultAvatarURL
+                }
+
                 embeds.push(embedPage);
             }
 
@@ -137,7 +148,7 @@ function popularCommandHandler(discordMessage: Discord.Message, args: string[]) 
                 .showPageIndicator(true)
                 .setPage(1)
                 .build();
-        })
+        });
 }
 
 function statsCommandHandler(discordMessage: Discord.Message, args: string[]) {
