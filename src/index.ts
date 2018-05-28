@@ -23,6 +23,12 @@ The main goal of this bot right now is to get a
 set of popular posts for e621 through the wrapped API
 
 Eventually it should also allow a schedule to be set to post popular images of the day
+
+TODO: get a basic scheduler working as well as a way to find when new e621 popular art
+is posted
+TODO: allow a server to &subscribe a channel to popular updates
+TODO: On guild join, find the first server where the bot can send messages to or a 'geveral'
+channel so we can tell users how to use the bot
 */
 
 client.on('ready', () => {
