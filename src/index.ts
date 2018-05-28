@@ -29,6 +29,7 @@ is posted
 TODO: allow a server to &subscribe a channel to popular updates
 TODO: On guild join, find the first server where the bot can send messages to or a 'geveral'
 channel so we can tell users how to use the bot
+TODO: move the bot to a class like we did with WFPatchBot
 */
 
 client.on('ready', () => {
@@ -74,7 +75,7 @@ client.on('message', async message => {
             return popularCommandHandler(message, args);
         case 'stats':
             // admin-only stats command
-            return statsCommandHandler(message, args);
+            return statsCommandHandler(message);
         case 'timetest':
             return timeCommandHandler(message, args);
         default:
@@ -153,7 +154,7 @@ function popularCommandHandler(discordMessage: Discord.Message, args: string[]) 
         });
 }
 
-function statsCommandHandler(discordMessage: Discord.Message, args: string[]) {
+function statsCommandHandler(discordMessage: Discord.Message) {
     // check if the user who called is an admin from the config file
     if (discordMessage.author.id == adminID) {
         // Create a rich embed to send
@@ -165,7 +166,11 @@ function statsCommandHandler(discordMessage: Discord.Message, args: string[]) {
             icon_url: client.user.defaultAvatarURL
         };
         statsEmbed.setTitle(`e621-Bot v${ver}`);
-        let processInfo = `RAM Total: ${Math.round(os.totalmem() / 1024 / 1024)}MB\nRAM free: ${Math.round(os.freemem() / 1024 / 1024)}MB\nIn use by Bot: ${Math.round(process.memoryUsage().heapTotal / 1024 / 1024)}MB\nCPU load: ${os.loadavg()[0]}%`;
+        let processInfo =
+            `RAM Total: ${Math.round(os.totalmem() / 1024 / 1024)}MB` +
+            `\nRAM free: ${Math.round(os.freemem() / 1024 / 1024)}MB` +
+            `\nIn use by Bot: ${Math.round(process.memoryUsage().heapTotal / 1024 / 1024)}MB` +
+            `\nCPU load: ${os.loadavg()[0]}%`;
         statsEmbed.addField('Process Info', processInfo, false);
         statsEmbed.addField('Uptime', formatTime(process.uptime()), true);
         statsEmbed.addField('Serving', `${client.guilds.size} servers`, true);
