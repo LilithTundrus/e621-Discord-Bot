@@ -45,7 +45,6 @@ client.on('guildDelete', guild => {
 
 // This event will run on every single message received, from any channel or DM.
 client.on('message', async message => {
-
     // It's good practice to ignore other bots. This also makes your bot ignore itself
     if (message.author.bot) return;
     // Also good practice to ignore any message that does not start with the bot'ss prefix, 
@@ -87,18 +86,16 @@ client.on('error', async error => {
 client.login(botToken);
 
 function helpCommandHandler(discordMessage: Discord.Message, args: string[]) {
+    // this is where a user should be able to get a set of commands and help
+    // on a specific command if given
     return discordMessage.channel.send('Test');
 }
 
 function popularCommandHandler(discordMessage: Discord.Message, args: string[]) {
     // parse for the arguments to choose the popularity enum
     if (args.length == 0) {
-        // send a fancy embed error message
-        // TODO: make this error embed a callable function to autofill and return a special error embed
-        let errorEmbed = new Discord.RichEmbed();
-        errorEmbed.title = 'Error';
-        errorEmbed.description = 'Please give an argument for the **popular** command(daily, weekly or monthly)';
-
+        // send an embed error message
+        let errorEmbed = createRichError('Please give an argument for the **popular** command(daily, weekly or monthly)');
         return discordMessage.channel.send(errorEmbed);
     }
     // try and pull an arg from the arguments list (after the first arg it doesn't matter)
@@ -115,9 +112,7 @@ function popularCommandHandler(discordMessage: Discord.Message, args: string[]) 
             popularOption = 2;
             break;
         default:
-            let errorEmbed = new Discord.RichEmbed();
-            errorEmbed.title = 'Error';
-            errorEmbed.description = `Invalid popular command argument: ${args[0]}`;
+            let errorEmbed = createRichError(`Invalid popular command argument: ${args[0]}`);
             return discordMessage.channel.send(errorEmbed);
     }
 
@@ -162,4 +157,13 @@ function statsCommandHandler(discordMessage: Discord.Message, args: string[]) {
             tried to use the 'stats' command at ${new Date().toTimeString()}`)
         return discordMessage.channel.send(`Permission denied. Logging this access attempt.`);
     }
+}
+
+
+function createRichError(errorMessage: string) {
+    let errorEmbed = new Discord.RichEmbed();
+    errorEmbed.title = 'Error';
+    errorEmbed.description = errorMessage;
+    errorEmbed.setColor(0x082C72);
+    return errorEmbed;
 }
