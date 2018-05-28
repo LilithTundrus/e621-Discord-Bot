@@ -69,6 +69,8 @@ client.on('message', async message => {
         case 'stats':
             // admin-only stats command
             return statsCommandHandler(message, args);
+        case 'timetest':
+            return timeCommandHandler(message, args);
         default:
             // if command character + unknown command is given we at least need to let the user know
             let errorEmbed = createRichError(`Uknown command: **${command}**`);
@@ -140,7 +142,7 @@ function popularCommandHandler(discordMessage: Discord.Message, args: string[]) 
                 .setChannel(discordMessage.channel)
                 .showPageIndicator(true)
                 .setPage(1)
-                .setColor(0x0A378F)
+                .setColor(3447003)
                 .build();
         });
 }
@@ -149,6 +151,7 @@ function statsCommandHandler(discordMessage: Discord.Message, args: string[]) {
     // check if the user who called is an admin from the config file
     if (discordMessage.author.id == adminID) {
         // Create a rich embed to send
+        //TODO: get a text channel count as well as number of members + online members
         let statsEmbed = new Discord.RichEmbed();
         statsEmbed.author = {
             name: client.user.username,
@@ -159,7 +162,8 @@ function statsCommandHandler(discordMessage: Discord.Message, args: string[]) {
         let processInfo = `RAM Total: ${Math.round(os.totalmem() / 1024 / 1024)}MB\nRAM free: ${Math.round(os.freemem() / 1024 / 1024)}MB\nIn use by Bot: ${Math.round(process.memoryUsage().heapTotal / 1024 / 1024)}MB\nCPU load: ${os.loadavg()[0]}%`;
         statsEmbed.addField('Process Info', processInfo, false);
         statsEmbed.addField('Uptime', formatTime(process.uptime()), true);
-        statsEmbed.setColor(0x0A378F);
+        statsEmbed.addField('Serving', `${client.guilds.size} servers`, true);
+        statsEmbed.setColor(3447003);
 
         return discordMessage.channel.send(statsEmbed);
     } else {
@@ -171,16 +175,23 @@ function statsCommandHandler(discordMessage: Discord.Message, args: string[]) {
     }
 }
 
+function timeCommandHandler(discordMessage: Discord.Message, args: string[]) {
+    // create an interval to send a message (testing)
+    setInterval(() => {
+        discordMessage.channel.send('Beh' + new Date().toTimeString())
+    }, 2000)
+}
 
 function createRichError(errorMessage: string) {
     let errorEmbed = new Discord.RichEmbed();
     errorEmbed.title = 'Error';
     errorEmbed.description = errorMessage;
-    errorEmbed.setColor(0x0A378F);
+    errorEmbed.setColor(3447003);
     return errorEmbed;
 }
 
-function formatTime(seconds: number) {                                      // Format process.uptime (or other UNIX long dates (probably))
+// Format unix long dates to hh::mm::ss
+function formatTime(seconds: number) {
     function pad(s) {
         return (s < 10 ? '0' : '') + s;
     }
