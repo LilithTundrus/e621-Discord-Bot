@@ -90,10 +90,8 @@ function helpCommandHandler(discordMessage: Discord.Message, args: string[]) {
     return discordMessage.channel.send('Test');
 }
 
-// TODO: have this take a daily/weekly/monthly arguments
 function popularCommandHandler(discordMessage: Discord.Message, args: string[]) {
     // parse for the arguments to choose the popularity enum
-    logger.debug(`${args}`);
     if (args.length == 0) {
         // send a fancy embed error message
         // TODO: make this error embed a callable function to autofill and return a special error embed
@@ -103,7 +101,7 @@ function popularCommandHandler(discordMessage: Discord.Message, args: string[]) 
 
         return discordMessage.channel.send(errorEmbed);
     }
-    // try and pull an arg from the arguments list (after the first doesn't matter)
+    // try and pull an arg from the arguments list (after the first arg it doesn't matter)
     let popularOption: number = 0;
 
     switch (args[0]) {
@@ -122,6 +120,7 @@ function popularCommandHandler(discordMessage: Discord.Message, args: string[]) 
             errorEmbed.description = `Invalid popular command argument: ${args[0]}`;
             return discordMessage.channel.send(errorEmbed);
     }
+
     return wrapper.posts.getPopularPosts(popularOption)
         .then((response) => {
             let embeds = [];
@@ -129,15 +128,13 @@ function popularCommandHandler(discordMessage: Discord.Message, args: string[]) 
                 let embedPage = new Discord.RichEmbed();
                 embedPage.setImage(response[i].file_url);
                 embedPage.setThumbnail(response[i].preview_url);
-                let message =
-                    `**Direct link**: ${response[i].file_url}\nPost link: https://e621.net/post/show/${response[i].id}`;
-                embedPage.description = message;
+                embedPage.addField('Direct Link', response[i].file_url, false);
+                embedPage.addField('Post Link', `https://e621.net/post/show/${response[i].id}`, false);
                 embedPage.author = {
                     name: client.user.username,
                     url: 'https://e621.net',
                     icon_url: client.user.defaultAvatarURL
-                }
-
+                };
                 embeds.push(embedPage);
             }
 
@@ -147,6 +144,7 @@ function popularCommandHandler(discordMessage: Discord.Message, args: string[]) 
                 .setChannel(discordMessage.channel)
                 .showPageIndicator(true)
                 .setPage(1)
+                .setColor(0x082C72)
                 .build();
         });
 }
