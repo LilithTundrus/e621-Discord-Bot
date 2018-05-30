@@ -11,6 +11,8 @@ import { logLevels } from 'colorful-log-levels/enums';
 import { createRichError } from './coomon/createRichError';
 // Discord command components
 import { statsCommandHandler } from './commands/stats';
+import { helpCommandHandler } from './commands/help';
+
 
 // Create an instance of a Discord client
 const client = new Discord.Client();
@@ -97,12 +99,6 @@ client.on('error', async error => {
 
 // Log the bot in
 client.login(botToken);
-
-function helpCommandHandler(discordMessage: Discord.Message, args: string[]) {
-    // this is where a user should be able to get a set of commands and help
-    // on a specific command if given
-    return discordMessage.channel.send('Test');
-}
 
 function popularCommandHandler(discordMessage: Discord.Message, args: string[]) {
     // parse for the arguments to choose the popularity enum
