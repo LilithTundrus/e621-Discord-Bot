@@ -8,7 +8,7 @@ import Logger from 'colorful-log-levels';
 // Get our config variables (as opposed to ENV variables)
 import { ver, prod, debug, botToken, prefix, adminID } from './config';
 import { logLevels } from 'colorful-log-levels/enums';
-
+import { createRichError } from './coomon/createRichError';
 // Discord command components
 import { statsCommandHandler } from './commands/stats';
 
@@ -163,12 +163,3 @@ function timeCommandHandler(discordMessage: Discord.Message, args: string[]) {
         discordMessage.channel.send('Beh' + new Date().toTimeString())
     }, 2000)
 }
-
-function createRichError(errorMessage: string) {
-    let errorEmbed = new Discord.RichEmbed();
-    errorEmbed.title = 'Error';
-    errorEmbed.description = errorMessage;
-    errorEmbed.setColor(3447003);
-    return errorEmbed;
-}
-
