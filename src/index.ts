@@ -1,17 +1,20 @@
 'use strict';
-// JS only module ( annoying but it needs to be like that)
-const { Embeds: EmbedsMode, FieldsEmbed: FieldsEmbedMode } = require('discord-paginationembed');
 import * as Discord from 'discord.js';
 import { MessageEmbed } from 'discord.js';
 import e621 from 'e621-api';
 import Logger from 'colorful-log-levels';
 // Get our config variables (as opposed to ENV variables)
-import { ver, prod, debug, botToken, prefix, adminID } from './config';
+import {
+    ver, prod, debug,
+    botToken, prefix,
+    adminID, e621UserAgent
+} from './config';
 import { logLevels } from 'colorful-log-levels/enums';
 import { createRichError } from './coomon/createRichError';
 // Discord command components
 import { statsCommandHandler } from './commands/stats';
 import { helpCommandHandler } from './commands/help';
+import { popularCommandHandler } from './commands/popular';
 
 
 // Create an instance of a Discord client
@@ -19,8 +22,7 @@ const client = new Discord.Client();
 // create a logger instance
 const logger = new Logger('../logs', logLevels.error, true);
 // create an e621 API instance
-const wrapper = new e621('e621DiscordBot0.0.1', null, null, 3);
-
+const wrapper = new e621(e621UserAgent, null, null, 3);
 /*
 The main goal of this bot right now is to get a
 set of popular posts for e621 through the wrapped API
@@ -32,8 +34,6 @@ is posted
 TODO: allow a server to &subscribe a channel to popular updates
 TODO: On guild join, find the first server where the bot can send messages to or a 'geveral'
 channel so we can tell users how to use the bot
-TODO: move the bot to a class like we did with WFPatchBot
-TODO: split out these functions into separate files if not one huge class
 TODO: do different things on prod vs. devel booleans
 */
 
@@ -68,7 +68,6 @@ client.on('message', async message => {
 
     switch (command) {
         case 'help':
-            // Display the help file
             return helpCommandHandler(message, args);
         case 'ping':
             // Calculates ping between sending a message and editing it, giving a nice round-trip latency.
@@ -77,7 +76,7 @@ client.on('message', async message => {
             m.edit(`Pong! Latency is ${m.createdTimestamp - message.createdTimestamp}ms. API Latency is ${Math.round(client.ping)}ms`);
             break;
         case 'popular':
-            return popularCommandHandler(message, args);
+            return popularCommandHandler(message, args, client, wrapper);
         case 'stats':
             // admin-only stats command
             return statsCommandHandler(message, client, logger);
@@ -99,59 +98,6 @@ client.on('error', async error => {
 
 // Log the bot in
 client.login(botToken);
-
-function popularCommandHandler(discordMessage: Discord.Message, args: string[]) {
-    // parse for the arguments to choose the popularity enum
-    if (args.length == 0) {
-        // send an embed error message
-        let errorEmbed = createRichError('Please give an argument for the **popular** command(daily, weekly or monthly)');
-        return discordMessage.channel.send(errorEmbed);
-    }
-    // try and pull an arg from the arguments list (after the first arg it doesn't matter)
-    let popularOption: number = 0;
-
-    switch (args[0]) {
-        case 'daily':
-            popularOption = 0;
-            break;
-        case 'weekly':
-            popularOption = 1;
-            break;
-        case 'monthly':
-            popularOption = 2;
-            break;
-        default:
-            let errorEmbed = createRichError(`Invalid popular command argument: ${args[0]}`);
-            return discordMessage.channel.send(errorEmbed);
-    }
-
-    return wrapper.posts.getPopularPosts(popularOption)
-        .then((response) => {
-            let embeds = [];
-            for (let i = 0; i < response.length; ++i) {
-                let embedPage = new Discord.RichEmbed();
-                embedPage.setImage(response[i].file_url);
-                embedPage.setThumbnail(response[i].preview_url);
-                embedPage.addField('Direct Link', response[i].file_url, false);
-                embedPage.addField('Post Link', `https://e621.net/post/show/${response[i].id}`, false);
-                embedPage.author = {
-                    name: client.user.username,
-                    url: 'https://e621.net',
-                    icon_url: client.user.defaultAvatarURL
-                };
-                embeds.push(embedPage);
-            }
-
-            new EmbedsMode()
-                .setArray(embeds)
-                .setAuthorizedUser(discordMessage.author)
-                .setChannel(discordMessage.channel)
-                .showPageIndicator(true)
-                .setPage(1)
-                .setColor(3447003)
-                .build();
-        });
-}
 
 function timeCommandHandler(discordMessage: Discord.Message, args: string[]) {
     // create an interval to send a message (testing)
