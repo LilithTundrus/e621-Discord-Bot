@@ -1,15 +1,18 @@
+// Definitions for message and client arg
 import * as Discord from 'discord.js';
+// For getting some system info
 import * as os from 'os';
+// Definitions for logger arg
 import Logger from 'colorful-log-levels';
-
 import { ver, prod, adminID } from '../config';
-
+// For creating consitent errors across all parts of the Discord bot
+import { createRichError } from '../coomon/createRichError';
 
 export function statsCommandHandler(discordMessage: Discord.Message, client: Discord.Client, logger: Logger) {
-    // check if the user who called is an admin from the config file
+    // Check if the user who called is an admin from the config file
     if (discordMessage.author.id == adminID) {
         // Create a rich embed to send
-        //TODO: get a text channel count as well as number of members + online members
+        // TODO: get a text channel count as well as number of members + online members
         let statsEmbed = new Discord.RichEmbed();
         statsEmbed.author = {
             name: client.user.username,
@@ -29,11 +32,12 @@ export function statsCommandHandler(discordMessage: Discord.Message, client: Dis
 
         return discordMessage.channel.send(statsEmbed);
     } else {
-        // send a permission denied message
+        // Send a permission denied message
         logger.auth(
             `${discordMessage.author.username} (${discordMessage.author.id})
             tried to use the 'stats' command at ${new Date().toTimeString()}`)
-        return discordMessage.channel.send(`Permission denied. Logging this access attempt.`);
+        let errorEmbed = createRichError(`Permission denied. Logging this access attempt.`);
+        return discordMessage.channel.send(errorEmbed);
     }
 }
 
