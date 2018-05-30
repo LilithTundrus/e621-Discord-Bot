@@ -1,8 +1,6 @@
 'use strict';
 // JS only module ( annoying but it needs to be like that)
 const { Embeds: EmbedsMode, FieldsEmbed: FieldsEmbedMode } = require('discord-paginationembed');
-
-import * as os from 'os';
 import * as Discord from 'discord.js';
 import { MessageEmbed } from 'discord.js';
 import e621 from 'e621-api';
@@ -10,6 +8,9 @@ import Logger from 'colorful-log-levels';
 // Get our config variables (as opposed to ENV variables)
 import { ver, prod, debug, botToken, prefix, adminID } from './config';
 import { logLevels } from 'colorful-log-levels/enums';
+
+// Discord command components
+import { statsCommandHandler } from './commands/stats';
 
 // Create an instance of a Discord client
 const client = new Discord.Client();
@@ -30,6 +31,8 @@ TODO: allow a server to &subscribe a channel to popular updates
 TODO: On guild join, find the first server where the bot can send messages to or a 'geveral'
 channel so we can tell users how to use the bot
 TODO: move the bot to a class like we did with WFPatchBot
+TODO: split out these functions into separate files if not one huge class
+TODO: do different things on prod vs. devel booleans
 */
 
 client.on('ready', () => {
@@ -75,7 +78,7 @@ client.on('message', async message => {
             return popularCommandHandler(message, args);
         case 'stats':
             // admin-only stats command
-            return statsCommandHandler(message);
+            return statsCommandHandler(message, client, logger);
         case 'timetest':
             return timeCommandHandler(message, args);
         default:
@@ -154,38 +157,6 @@ function popularCommandHandler(discordMessage: Discord.Message, args: string[]) 
         });
 }
 
-function statsCommandHandler(discordMessage: Discord.Message) {
-    // check if the user who called is an admin from the config file
-    if (discordMessage.author.id == adminID) {
-        // Create a rich embed to send
-        //TODO: get a text channel count as well as number of members + online members
-        let statsEmbed = new Discord.RichEmbed();
-        statsEmbed.author = {
-            name: client.user.username,
-            url: 'https://e621.net',
-            icon_url: client.user.defaultAvatarURL
-        };
-        statsEmbed.setTitle(`e621-Bot v${ver}`);
-        let processInfo =
-            `RAM Total: ${Math.round(os.totalmem() / 1024 / 1024)}MB` +
-            `\nRAM free: ${Math.round(os.freemem() / 1024 / 1024)}MB` +
-            `\nIn use by Bot: ${Math.round(process.memoryUsage().heapTotal / 1024 / 1024)}MB` +
-            `\nCPU load: ${os.loadavg()[0]}%`;
-        statsEmbed.addField('Process Info', processInfo, false);
-        statsEmbed.addField('Uptime', formatTime(process.uptime()), true);
-        statsEmbed.addField('Serving', `${client.guilds.size} servers`, true);
-        statsEmbed.setColor(3447003);
-
-        return discordMessage.channel.send(statsEmbed);
-    } else {
-        // send a permission denied message
-        logger.auth(
-            `${discordMessage.author.username} (${discordMessage.author.id})
-            tried to use the 'stats' command at ${new Date().toTimeString()}`)
-        return discordMessage.channel.send(`Permission denied. Logging this access attempt.`);
-    }
-}
-
 function timeCommandHandler(discordMessage: Discord.Message, args: string[]) {
     // create an interval to send a message (testing)
     setInterval(() => {
@@ -201,13 +172,3 @@ function createRichError(errorMessage: string) {
     return errorEmbed;
 }
 
-// Format unix long dates to hh::mm::ss
-function formatTime(seconds: number) {
-    function pad(s) {
-        return (s < 10 ? '0' : '') + s;
-    }
-    var hours = Math.floor(seconds / (60 * 60));
-    var minutes = Math.floor(seconds % (60 * 60) / 60);
-    var seconds = Math.floor(seconds % 60);
-    return pad(hours) + ':' + pad(minutes) + ':' + pad(seconds);
-}
