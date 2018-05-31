@@ -77,8 +77,6 @@ client.on('message', async message => {
             return popularCommandHandler(message, args, client, wrapper);
         case 'stats':
             return statsCommandHandler(message, client, logger);
-        case 'timetest':
-            return timeCommandHandler(message, args);
         case 'setchannel':
             return channelTest(message, args);
         default:
@@ -98,24 +96,19 @@ client.on('error', async error => {
 // Log the bot in
 client.login(botToken);
 
-function timeCommandHandler(discordMessage: Discord.Message, args: string[]) {
-    // create an interval to send a message (testing)
-    setInterval(() => {
-        discordMessage.channel.send('Beh' + new Date().toTimeString())
-    }, 2000)
-}
-
-let testArray: string[] = [];
+let testArray = [];
 
 function channelTest(discordMessage: Discord.Message, args: string[]) {
 
     // get info about the server channel and add it to the array for getting
     // new e621 updates
-    testArray.push(discordMessage.channel.id);
+    testArray.push(discordMessage.channel);
     testArray.forEach((channel) => {
+        // PM should be fine
         setInterval(() => {
-            let test = client.channels.get(channel)
-            client.user.send('beh', {reply: test.id})
-        }, 2000)
+            wrapper.posts.getPopularPosts(0).then((response) => {
+                channel.send(response[0].file_url)
+            })
+        }, 20000)
     })
 }
