@@ -1,6 +1,5 @@
 'use strict';
 import * as Discord from 'discord.js';
-import { MessageEmbed } from 'discord.js';
 import e621 from 'e621-api';
 import Logger from 'colorful-log-levels';
 // Get our config variables (as opposed to ENV variables)
@@ -15,7 +14,6 @@ import { createRichError } from './coomon/createRichError';
 import { statsCommandHandler } from './commands/stats';
 import { helpCommandHandler } from './commands/help';
 import { popularCommandHandler } from './commands/popular';
-
 
 // Create an instance of a Discord client
 const client = new Discord.Client();
@@ -78,10 +76,11 @@ client.on('message', async message => {
         case 'popular':
             return popularCommandHandler(message, args, client, wrapper);
         case 'stats':
-            // admin-only stats command
             return statsCommandHandler(message, client, logger);
         case 'timetest':
             return timeCommandHandler(message, args);
+        case 'setchannel':
+            return channelTest(message, args);
         default:
             // if command character + unknown command is given we at least need to let the user know
             let errorEmbed = createRichError(`Uknown command: **${command}**`);
@@ -104,4 +103,19 @@ function timeCommandHandler(discordMessage: Discord.Message, args: string[]) {
     setInterval(() => {
         discordMessage.channel.send('Beh' + new Date().toTimeString())
     }, 2000)
+}
+
+let testArray: string[] = [];
+
+function channelTest(discordMessage: Discord.Message, args: string[]) {
+
+    // get info about the server channel and add it to the array for getting
+    // new e621 updates
+    testArray.push(discordMessage.channel.id);
+    testArray.forEach((channel) => {
+        setInterval(() => {
+            let test = client.channels.get(channel)
+            client.user.send('beh', {reply: test.id})
+        }, 2000)
+    })
 }
