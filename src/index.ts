@@ -9,7 +9,9 @@ import {
     adminID, e621UserAgent
 } from './config';
 import { logLevels } from 'colorful-log-levels/enums';
+// Embed templates
 import { createRichError } from './coomon/createRichError';
+import { createRichEmbed } from './coomon/createRichEmbed';
 // Discord command components
 import { statsCommandHandler } from './commands/stats';
 import { helpCommandHandler } from './commands/help';
@@ -39,7 +41,7 @@ TODO: do different things on prod vs. devel booleans
 
 client.on('ready', () => {
     // this is where we should start the intervals of each server by reading a file
-    initScheduler(client, wrapper)
+    initScheduler(client, wrapper);
     logger.info(`Connected to Discord.\nLogged in as ${client.user.username} (${client.user.id})`);
     client.user.setActivity(`Serving ${client.guilds.size} servers`);
 });
@@ -100,12 +102,12 @@ client.on('error', async error => {
 // Log the bot in
 client.login(botToken);
 
-
-function channelTest(discordMessage: Discord.Message, args: string[]) {
+async function channelTest(discordMessage: Discord.Message, args: string[]) {
     /* Pseudocode outline
         get channel ID
         add channel to stored array
         let the user know the channel has been added
+    
         get the 'inital' set of images for that channel
         add set of images to that user's/channel's cache
         every X minutes, check against each user's cache for new popular items
@@ -114,20 +116,11 @@ function channelTest(discordMessage: Discord.Message, args: string[]) {
     // get info about the server channel and add it to the array for getting
     // new e621 updates
     //MAKE SURE CHANNEL ISNT ALREADY REGISTERAED
-    // storage.registerChannel(discordMessage.channel.id)
-    // let testArray = storage.readServerFile();
-    // testArray.forEach((channelID) => {
-    //     // declared as any since the send method does exist but isn't typed
-    //     let channel: any = client.channels.get(channelID.id)
-    //     console.log(channel)
-    //     wrapper.posts.getPopularPosts(0).then((response) => {
-    //         channel.send(response[0].file_url)
-    //     })
-    //     // PM should be fine
-    //     setInterval(() => {
-    //         wrapper.posts.getPopularPosts(0).then((response) => {
-    //             channel.send(response[0].file_url)
-    //         })
-    //     }, 20000)
-    // })
+    // send a 'processing' embed
+    let infoMessage = createRichEmbed('Info', 'Please wait....');
+    const m: any = await discordMessage.channel.send(infoMessage);
+    if (storage.checkIfChannelIsRegistered(discordMessage.channel.id)) {
+        m.edit(createRichEmbed('Error', 'You are alreadt subscribed'))
+    }
+
 }

@@ -14,7 +14,6 @@ export function readChannelsFile(): channelInfo[] {
 }
 
 export function registerChannel(channelID) {
-
     let workingJSON = readChannelsFile();
     workingJSON.push({
         id: channelID
@@ -23,3 +22,14 @@ export function registerChannel(channelID) {
     fs.writeFileSync(registeredChannelsFile, JSON.stringify(workingJSON, null, 2))
 }
 
+export function checkIfChannelIsRegistered(channelID) {
+    let returnBool = false
+    let workingJSON = readChannelsFile();
+    for (let channel of workingJSON) {
+        if (channel.id == channelID) {
+            returnBool = true;
+            break;
+        }
+    }
+    return returnBool;
+}
