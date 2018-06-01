@@ -120,7 +120,12 @@ async function channelTest(discordMessage: Discord.Message, args: string[]) {
     let infoMessage = createRichEmbed('Info', 'Please wait....');
     const m: any = await discordMessage.channel.send(infoMessage);
     if (storage.checkIfChannelIsRegistered(discordMessage.channel.id)) {
-        m.edit(createRichEmbed('Error', 'You are alreadt subscribed'))
+        m.edit(createRichEmbed('Error', 'You are already subscribed'));
+    } else {
+        // add the user
+        storage.registerChannel(discordMessage.channel.id);
+        m.edit(createRichEmbed('Info', 'Done! This channel will now receive new e621 popular posts'));
+        //  we need to re-init the scheduler now
     }
 
 }
