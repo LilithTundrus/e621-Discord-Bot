@@ -14,6 +14,7 @@ import { createRichError } from './coomon/createRichError';
 import { statsCommandHandler } from './commands/stats';
 import { helpCommandHandler } from './commands/help';
 import { popularCommandHandler } from './commands/popular';
+import * as storage from './storageController'
 
 // Create an instance of a Discord client
 const client = new Discord.Client();
@@ -36,6 +37,7 @@ TODO: do different things on prod vs. devel booleans
 */
 
 client.on('ready', () => {
+    // this is where we should start the intervals of each server by reading a file
     logger.info(`Connected to Discord.\nLogged in as ${client.user.username} (${client.user.id})`);
     client.user.setActivity(`Serving ${client.guilds.size} servers`);
 });
@@ -99,11 +101,23 @@ client.login(botToken);
 let testArray = [];
 
 function channelTest(discordMessage: Discord.Message, args: string[]) {
-
+    /* Pseudocode outline
+        get channel ID
+        add channel to stored array
+        let the user know the channel has been added
+        get the 'inital' set of images for that channel
+        add set of images to that user's/channel's cache
+        every X minutes, check against each user's cache for new popular items
+        (eventually support a blacklist)
+    */
     // get info about the server channel and add it to the array for getting
     // new e621 updates
     testArray.push(discordMessage.channel);
     testArray.forEach((channel) => {
+        console.log(storage.readServerFile())
+        wrapper.posts.getPopularPosts(0).then((response) => {
+            channel.send(response[0].file_url)
+        })
         // PM should be fine
         setInterval(() => {
             wrapper.posts.getPopularPosts(0).then((response) => {
