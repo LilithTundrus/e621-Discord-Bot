@@ -4,7 +4,7 @@ import { registeredChannelsFile } from './config';
 import * as Discord from 'discord.js';
 
 export interface channelInfo {
-    id: number | string;
+    id: string;
 }
 
 export function readChannelsFile(): channelInfo[] {

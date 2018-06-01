@@ -15,6 +15,7 @@ import { statsCommandHandler } from './commands/stats';
 import { helpCommandHandler } from './commands/help';
 import { popularCommandHandler } from './commands/popular';
 import * as storage from './storageController'
+import { initScheduler } from './scheduler';
 
 // Create an instance of a Discord client
 const client = new Discord.Client();
@@ -38,6 +39,7 @@ TODO: do different things on prod vs. devel booleans
 
 client.on('ready', () => {
     // this is where we should start the intervals of each server by reading a file
+    initScheduler(client, wrapper)
     logger.info(`Connected to Discord.\nLogged in as ${client.user.username} (${client.user.id})`);
     client.user.setActivity(`Serving ${client.guilds.size} servers`);
 });
@@ -98,7 +100,6 @@ client.on('error', async error => {
 // Log the bot in
 client.login(botToken);
 
-let testArray = [];
 
 function channelTest(discordMessage: Discord.Message, args: string[]) {
     /* Pseudocode outline
@@ -112,17 +113,21 @@ function channelTest(discordMessage: Discord.Message, args: string[]) {
     */
     // get info about the server channel and add it to the array for getting
     // new e621 updates
-    testArray.push(discordMessage.channel);
-    testArray.forEach((channel) => {
-        console.log(storage.readServerFile())
-        wrapper.posts.getPopularPosts(0).then((response) => {
-            channel.send(response[0].file_url)
-        })
-        // PM should be fine
-        setInterval(() => {
-            wrapper.posts.getPopularPosts(0).then((response) => {
-                channel.send(response[0].file_url)
-            })
-        }, 20000)
-    })
+    //MAKE SURE CHANNEL ISNT ALREADY REGISTERAED
+    // storage.registerChannel(discordMessage.channel.id)
+    // let testArray = storage.readServerFile();
+    // testArray.forEach((channelID) => {
+    //     // declared as any since the send method does exist but isn't typed
+    //     let channel: any = client.channels.get(channelID.id)
+    //     console.log(channel)
+    //     wrapper.posts.getPopularPosts(0).then((response) => {
+    //         channel.send(response[0].file_url)
+    //     })
+    //     // PM should be fine
+    //     setInterval(() => {
+    //         wrapper.posts.getPopularPosts(0).then((response) => {
+    //             channel.send(response[0].file_url)
+    //         })
+    //     }, 20000)
+    // })
 }
