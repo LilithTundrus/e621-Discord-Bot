@@ -64,3 +64,4 @@ build/**
 config.**
 
 src/registeredChannels.json
+**.sqlite
