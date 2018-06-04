@@ -1,14 +1,17 @@
 'use strict';
+// npm package requires
 import * as Discord from 'discord.js';
 import e621 from 'e621-api';
 import Logger from 'colorful-log-levels';
+import * as sqlite3 from 'sqlite3';
+import { logLevels } from 'colorful-log-levels/enums';
+
 // Get our config variables (as opposed to ENV variables)
 import {
     ver, prod, debug,
     botToken, prefix,
     adminID, e621UserAgent
 } from './config';
-import { logLevels } from 'colorful-log-levels/enums';
 // Embed templates
 import { createRichError } from './coomon/createRichError';
 import { createRichEmbed } from './coomon/createRichEmbed';
@@ -18,13 +21,35 @@ import { helpCommandHandler } from './commands/help';
 import { popularCommandHandler } from './commands/popular';
 import * as storage from './storageController'
 import { initScheduler } from './scheduler';
-
 // Create an instance of a Discord client
 const client = new Discord.Client();
 // create a logger instance
 const logger = new Logger('../logs', logLevels.error, true);
 // create an e621 API instance
 const wrapper = new e621(e621UserAgent, null, null, 3);
+
+// sql inits
+let sql = sqlite3.verbose();
+
+// let db = new sql.Database('./database/storage.sqlite')
+let db = new sql.Database(':memory:');
+
+db.serialize(function () {
+    db.run("CREATE TABLE lorem (info TEXT)");
+
+    var stmt = db.prepare("INSERT INTO lorem VALUES (?)");
+    for (var i = 0; i < 10; i++) {
+        stmt.run("Ipsum " + i);
+    }
+    stmt.finalize();
+
+    db.each("SELECT rowid AS id, info FROM lorem", function (err, row) {
+        console.log(row.id + ": " + row.info);
+    });
+});
+
+db.close();
+
 /*
 The main goal of this bot right now is to get a
 set of popular posts for e621 through the wrapped API
@@ -54,6 +79,7 @@ client.on('guildCreate', guild => {
 });
 
 client.on('guildDelete', guild => {
+    // TOOD: unregister the channel if the bot is kicked
     // this event triggers when the bot is removed from a guild.
     logger.info(`Bot removed from: ${guild.name} (id: ${guild.id})`);
     client.user.setActivity(`Serving ${client.guilds.size} servers`);
@@ -115,14 +141,14 @@ async function channelTest(discordMessage: Discord.Message, args: string[]) {
     */
     // get info about the server channel and add it to the array for getting
     // new e621 updates
-    //MAKE SURE CHANNEL ISNT ALREADY REGISTERAED
-    // send a 'processing' embed
+    // Send a 'processing' embed
     let infoMessage = createRichEmbed('Info', 'Please wait....');
     const m: any = await discordMessage.channel.send(infoMessage);
+    // Make sure the user isn't already registered
     if (storage.checkIfChannelIsRegistered(discordMessage.channel.id)) {
         m.edit(createRichEmbed('Error', 'You are already subscribed'));
     } else {
-        // add the user
+        // add the user (and the array of 'current' images/the popular results first )
         storage.registerChannel(discordMessage.channel.id);
         m.edit(createRichEmbed('Info', 'Done! This channel will now receive new e621 popular posts'));
         //  we need to re-init the scheduler now

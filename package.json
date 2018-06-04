@@ -29,9 +29,11 @@
   "homepage": "https://github.com/LilithTundrus/e621-Discord-Bot#readme",
   "dependencies": {
     "@types/node": "^10.1.2",
+    "@types/sqlite3": "^3.1.3",
     "colorful-log-levels": "^0.2.0",
     "discord-paginationembed": "github:gazmull/discord-paginationembed#v11",
     "discord.js": "^11.3.2",
-    "e621-api": "^0.3.7"
+    "e621-api": "^0.3.7",
+    "sqlite3": "^4.0.0"
   }
 }
