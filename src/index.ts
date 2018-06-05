@@ -3,7 +3,6 @@
 import * as Discord from 'discord.js';
 import e621 from 'e621-api';
 import Logger from 'colorful-log-levels';
-import * as sqlite3 from 'sqlite3';
 import { logLevels } from 'colorful-log-levels/enums';
 import * as path from 'path';
 
@@ -29,18 +28,10 @@ const logger = new Logger('../logs', logLevels.error, true);
 // create an e621 API instance
 const wrapper = new e621(e621UserAgent, null, null, 3);
 
-// sql inits
-let sql = sqlite3.verbose();
-const dbPath = path.resolve(__dirname, 'database/storage.db')
-logger.debug(dbPath)
-let db = new sql.Database(dbPath, sqlite3.OPEN_READWRITE | sqlite3.OPEN_CREATE,
-    (err) => {
-        if (err) {
-            logger.error(err.message);
-        }
-    }
-);
-
+storage.initDB(logger);
+// storage.createDB(logger);
+storage.addChannelToDB(124354)
+storage.getAllChannels();
 // db.serialize(function () {
 //     db.run("CREATE TABLE lorem (info TEXT)");
 
@@ -55,7 +46,7 @@ let db = new sql.Database(dbPath, sqlite3.OPEN_READWRITE | sqlite3.OPEN_CREATE,
 //     });
 // });
 
-db.close();
+
 
 /*
 The main goal of this bot right now is to get a
@@ -73,7 +64,7 @@ TODO: do different things on prod vs. devel booleans
 
 client.on('ready', () => {
     // this is where we should start the intervals of each server by reading a file
-    initScheduler(client, wrapper);
+    // initScheduler(client, wrapper);
     logger.info(`Connected to Discord.\nLogged in as ${client.user.username} (${client.user.id})`);
     client.user.setActivity(`Serving ${client.guilds.size} servers`);
 });
