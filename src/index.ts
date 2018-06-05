@@ -5,6 +5,7 @@ import e621 from 'e621-api';
 import Logger from 'colorful-log-levels';
 import * as sqlite3 from 'sqlite3';
 import { logLevels } from 'colorful-log-levels/enums';
+import * as path from 'path';
 
 // Get our config variables (as opposed to ENV variables)
 import {
@@ -30,32 +31,38 @@ const wrapper = new e621(e621UserAgent, null, null, 3);
 
 // sql inits
 let sql = sqlite3.verbose();
-
-// let db = new sql.Database('./database/storage.sqlite')
-let db = new sql.Database(':memory:');
-
-db.serialize(function () {
-    db.run("CREATE TABLE lorem (info TEXT)");
-
-    var stmt = db.prepare("INSERT INTO lorem VALUES (?)");
-    for (var i = 0; i < 10; i++) {
-        stmt.run("Ipsum " + i);
+const dbPath = path.resolve(__dirname, 'database/storage.db')
+logger.debug(dbPath)
+let db = new sql.Database(dbPath, sqlite3.OPEN_READWRITE | sqlite3.OPEN_CREATE,
+    (err) => {
+        if (err) {
+            logger.error(err.message);
+        }
     }
-    stmt.finalize();
+);
 
-    db.each("SELECT rowid AS id, info FROM lorem", function (err, row) {
-        console.log(row.id + ": " + row.info);
-    });
-});
+// db.serialize(function () {
+//     db.run("CREATE TABLE lorem (info TEXT)");
+
+//     var stmt = db.prepare("INSERT INTO lorem VALUES (?)");
+//     for (var i = 0; i < 10; i++) {
+//         stmt.run("Ipsum " + i);
+//     }
+//     stmt.finalize();
+
+//     db.each("SELECT rowid AS id, info FROM lorem", function (err, row) {
+//         console.log(row.id + ": " + row.info);
+//     });
+// });
 
 db.close();
 
 /*
 The main goal of this bot right now is to get a
 set of popular posts for e621 through the wrapped API
-
+ 
 Eventually it should also allow a schedule to be set to post popular images of the day
-
+ 
 TODO: get a basic scheduler working as well as a way to find when new e621 popular art
 is posted
 TODO: allow a server to &subscribe a channel to popular updates
