@@ -44,12 +44,14 @@ export function closeDB(logger: Logger) {
 };
 
 export function getAllChannels() {
-    db.serialize(() => {
-        db.all("SELECT * FROM channels", (err, row) => {
-            if (err) {
-                console.error(err.message);
-            }
-            console.log(row);
+    return new Promise((resolve, reject) => {
+        db.serialize(() => {
+            db.all("SELECT * FROM channels", (err, row) => {
+                if (err) {
+                    return reject(err)
+                }
+                return resolve(row)
+            });
         });
     });
 }
@@ -64,11 +66,14 @@ export function addChannelToDB(channelID) {
     });
 }
 
-// export function readChannelsFile(): channelInfo[] {
-//     // // read the registeredServers.json file and return contents
-//     // // TODO: Make this async!
-//     // return JSON.parse(fs.readFileSync(registeredChannelsFile, 'UTF-8'));
-// }
+export function removeChannelFromDB(channelID) {
+    db.run(`DELETE FROM channels WHERE channel=?`, channelID, function (err) {
+        if (err) {
+            return console.error(err.message);
+        }
+        console.log(`Row(s) deleted ${this.changes}`);
+    });
+}
 
 export function registerChannel(channelID) {
     // let workingJSON = readChannelsFile();

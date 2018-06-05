@@ -28,25 +28,7 @@ const logger = new Logger('../logs', logLevels.error, true);
 // create an e621 API instance
 const wrapper = new e621(e621UserAgent, null, null, 3);
 
-storage.initDB(logger);
-// storage.createDB(logger);
-storage.addChannelToDB(124354)
-storage.getAllChannels();
-// db.serialize(function () {
-//     db.run("CREATE TABLE lorem (info TEXT)");
-
-//     var stmt = db.prepare("INSERT INTO lorem VALUES (?)");
-//     for (var i = 0; i < 10; i++) {
-//         stmt.run("Ipsum " + i);
-//     }
-//     stmt.finalize();
-
-//     db.each("SELECT rowid AS id, info FROM lorem", function (err, row) {
-//         console.log(row.id + ": " + row.info);
-//     });
-// });
-
-
+// storage.addChannelToDB(124354)
 
 /*
 The main goal of this bot right now is to get a
@@ -63,8 +45,12 @@ TODO: do different things on prod vs. devel booleans
 */
 
 client.on('ready', () => {
+    storage.initDB(logger);
+    storage.removeChannelFromDB('339847113888497665');
+    storage.getAllChannels()
+        .then((results) => console.log(results))
     // this is where we should start the intervals of each server by reading a file
-    // initScheduler(client, wrapper);
+    initScheduler(client, wrapper);
     logger.info(`Connected to Discord.\nLogged in as ${client.user.username} (${client.user.id})`);
     client.user.setActivity(`Serving ${client.guilds.size} servers`);
 });
