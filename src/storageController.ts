@@ -1,10 +1,8 @@
-// import * as fs from 'fs';
 import * as path from 'path';
 // import { registeredChannelsFile } from './config';
 import * as sqlite3 from 'sqlite3';
 import * as Discord from 'discord.js';
 import Logger from 'colorful-log-levels';
-
 
 let sql = sqlite3.verbose();
 const dbPath = path.resolve(__dirname, 'database/storage.db');
@@ -73,15 +71,6 @@ export function removeChannelFromDB(channelID) {
         }
         console.log(`Row(s) deleted ${this.changes}`);
     });
-}
-
-export function registerChannel(channelID) {
-    // let workingJSON = readChannelsFile();
-    // workingJSON.push({
-    //     id: channelID
-    // });
-    // // we should probably make sure the file hasn't changed between being read and written to
-    // fs.writeFileSync(registeredChannelsFile, JSON.stringify(workingJSON, null, 2))
 }
 
 export function checkIfChannelIsRegistered(channelID) {
