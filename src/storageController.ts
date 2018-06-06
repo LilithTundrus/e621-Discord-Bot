@@ -46,9 +46,9 @@ export function getAllChannels() {
         db.serialize(() => {
             db.all("SELECT * FROM channels", (err, row) => {
                 if (err) {
-                    return reject(err)
+                    return reject(err);
                 }
-                return resolve(row)
+                return resolve(row);
             });
         });
     });
@@ -74,13 +74,18 @@ export function removeChannelFromDB(channelID) {
 }
 
 export function checkIfChannelIsRegistered(channelID) {
-    // let returnBool = false
-    // let workingJSON = readChannelsFile();
-    // for (let channel of workingJSON) {
-    //     if (channel.id == channelID) {
-    //         returnBool = true;
-    //         break;
-    //     }
-    // }
-    // return returnBool;
+    return new Promise((resolve, reject) => {
+        db.serialize(() => {
+            db.all("SELECT * FROM channels WHERE channel=?", channelID, (err, row) => {
+                if (err) {
+                    return reject(err);
+                }
+                if (row.length < 1) {
+                    return resolve(false);
+                } else {
+                    return resolve(true)
+                }
+            });
+        });
+    });
 }

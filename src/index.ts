@@ -28,8 +28,6 @@ const logger = new Logger('../logs', logLevels.error, true);
 // create an e621 API instance
 const wrapper = new e621(e621UserAgent, null, null, 3);
 
-// storage.addChannelToDB(124354)
-
 /*
 The main goal of this bot right now is to get a
 set of popular posts for e621 through the wrapped API
@@ -42,13 +40,15 @@ TODO: allow a server to &subscribe a channel to popular updates
 TODO: On guild join, find the first server where the bot can send messages to or a 'geveral'
 channel so we can tell users how to use the bot
 TODO: do different things on prod vs. devel booleans
+TODO: update DB to support all of the tables we'll eventually need
 */
 
 client.on('ready', () => {
     storage.initDB(logger);
-    storage.removeChannelFromDB('339847113888497665');
     storage.getAllChannels()
         .then((results) => console.log(results))
+    storage.checkIfChannelIsRegistered('BEH')
+        .then((data) => console.log(data))
     // this is where we should start the intervals of each server by reading a file
     initScheduler(client, wrapper);
     logger.info(`Connected to Discord.\nLogged in as ${client.user.username} (${client.user.id})`);
@@ -133,7 +133,7 @@ async function channelTest(discordMessage: Discord.Message, args: string[]) {
         m.edit(createRichEmbed('Error', 'You are already subscribed'));
     } else {
         // add the user (and the array of 'current' images/the popular results first )
-        storage.registerChannel(discordMessage.channel.id);
+        storage.addChannelToDB(discordMessage.channel.id);
         m.edit(createRichEmbed('Info', 'Done! This channel will now receive new e621 popular posts'));
         //  we need to re-init the scheduler now
     }

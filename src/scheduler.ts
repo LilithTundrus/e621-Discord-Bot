@@ -34,3 +34,7 @@ export function initScheduler(client: Discord.Client, wrapper: e621) {
     //     }, 20000)
     // })
 }
+
+function addChannelToScheduler() {
+    // add a channel to the scheduler after the bot has already been run
+}
