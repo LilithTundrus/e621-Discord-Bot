@@ -47,8 +47,6 @@ client.on('ready', () => {
     storage.initDB(logger);
     storage.getAllChannels()
         .then((results) => console.log(results))
-    storage.checkIfChannelIsRegistered('BEH')
-        .then((data) => console.log(data))
     // this is where we should start the intervals of each server by reading a file
     initScheduler(client, wrapper);
     logger.info(`Connected to Discord.\nLogged in as ${client.user.username} (${client.user.id})`);
@@ -63,10 +61,15 @@ client.on('guildCreate', guild => {
 });
 
 client.on('guildDelete', guild => {
-    // TOOD: unregister the channel if the bot is kicked
     // this event triggers when the bot is removed from a guild.
     logger.info(`Bot removed from: ${guild.name} (id: ${guild.id})`);
     client.user.setActivity(`Serving ${client.guilds.size} servers`);
+    // flush all channels the guild had registered
+    // THIS NEEDS TO BE TESTED
+    guild.channels.forEach((channel) => {
+        return storage.removeChannelFromDB(channel.id);
+        // we also need to de-init the scheduler for the cahnnels
+    })
 });
 
 // This event will run on every single message received, from any channel or DM.
@@ -129,13 +132,15 @@ async function channelTest(discordMessage: Discord.Message, args: string[]) {
     let infoMessage = createRichEmbed('Info', 'Please wait....');
     const m: any = await discordMessage.channel.send(infoMessage);
     // Make sure the user isn't already registered
-    if (storage.checkIfChannelIsRegistered(discordMessage.channel.id)) {
-        m.edit(createRichEmbed('Error', 'You are already subscribed'));
-    } else {
-        // add the user (and the array of 'current' images/the popular results first )
-        storage.addChannelToDB(discordMessage.channel.id);
-        m.edit(createRichEmbed('Info', 'Done! This channel will now receive new e621 popular posts'));
-        //  we need to re-init the scheduler now
-    }
-
+    storage.checkIfChannelIsRegistered(discordMessage.channel.id)
+        .then((isRegistered) => {
+            if (isRegistered) {
+                m.edit(createRichEmbed('Error', 'You are already subscribed'));
+            } else {
+                // add the user (and the array of 'current' images/the popular results first )
+                storage.addChannelToDB(discordMessage.channel.id);
+                m.edit(createRichEmbed('Info', 'Done! This channel will now receive new e621 popular posts'));
+                //  we need to re-init the scheduler now
+            }
+        });
 }
