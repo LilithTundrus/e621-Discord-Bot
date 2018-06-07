@@ -11,10 +11,10 @@ let testObj = {
     id: 1234,
     nextCheck: 20000,
     checkInterval: [],
-
+    blacklistedTags: 'test test2'
 };
 
-
+// TODO: make sure this does nothing if the DB array is empty
 export function initScheduler(client: Discord.Client, wrapper: e621) {
     // read the user/channel manifest
     storage.getAllChannels()
@@ -49,7 +49,11 @@ export function initScheduler(client: Discord.Client, wrapper: e621) {
     // })
 }
 
-export function addChannelToScheduler() {
+export function addChannelToScheduler(client: Discord.Client, wrapper: e621, channelID) {
     // add a channel to the scheduler after the bot has already been run
     console.log('test')
+    wrapper.posts.getPopularPosts(0)
+        .then((response) => {
+            storage.updateChannelJSON(channelID, JSON.stringify(response).replace(`'`, `"`))
+        })
 }
