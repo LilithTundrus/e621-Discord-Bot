@@ -9,7 +9,8 @@ const dbPath = path.resolve(__dirname, 'database/storage.db');
 // global for all below functions
 let db;
 
-// TOOD: add typings/interfaces here
+// TODO: add typings/interfaces here
+// TODO: clean this up and make it readable
 
 export function initDB(logger: Logger) {
     // sql inits
@@ -90,14 +91,13 @@ export function checkIfChannelIsRegistered(channelID) {
 
 export function updateChannelJSON(channelID, updatedJSONString) {
     let sql = `UPDATE channels
-    SET json = ${updatedJSONString}
-    WHERE channel = ${channelID}`;
+    SET json = ?
+    WHERE channel = ?`;
 
-    db.run(sql, function (err) {
+    db.run(sql, updatedJSONString, channelID, function (err) {
         if (err) {
             return console.error(err.message);
         }
         console.log(`Row(s) updated: ${this.changes}`);
-
     });
 }
