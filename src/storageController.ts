@@ -9,9 +9,7 @@ const dbPath = path.resolve(__dirname, 'database/storage.db');
 // global for all below functions
 let db;
 
-export interface channelInfo {
-    id: string;
-}
+// TOOD: add typings/interfaces here
 
 export function initDB(logger: Logger) {
     // sql inits
@@ -27,8 +25,8 @@ export function initDB(logger: Logger) {
 
 export function createDB(logger: Logger) {
     db.serialize(function (err) {
-        db.run("CREATE TABLE channels (channel TEXT)");
-        logger.db('CREATED Main table')
+        db.run("CREATE TABLE channels (channel TEXT, json TEXT)");
+        logger.db('CREATED Main table');
     });
 }
 
@@ -87,5 +85,19 @@ export function checkIfChannelIsRegistered(channelID) {
                 }
             });
         });
+    });
+}
+
+export function updateChannelJSON(channelID, updatedJSONString) {
+    let sql = `UPDATE channels
+    SET json = ${updatedJSONString}
+    WHERE channel = ${channelID}`;
+
+    db.run(sql, function (err) {
+        if (err) {
+            return console.error(err.message);
+        }
+        console.log(`Row(s) updated: ${this.changes}`);
+
     });
 }

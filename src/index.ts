@@ -12,6 +12,7 @@ import {
     botToken, prefix,
     adminID, e621UserAgent
 } from './config';
+
 // Embed templates
 import { createRichError } from './coomon/createRichError';
 import { createRichEmbed } from './coomon/createRichEmbed';
@@ -20,7 +21,8 @@ import { statsCommandHandler } from './commands/stats';
 import { helpCommandHandler } from './commands/help';
 import { popularCommandHandler } from './commands/popular';
 import * as storage from './storageController'
-import { initScheduler } from './scheduler';
+import { initScheduler, addChannelToScheduler } from './scheduler';
+
 // Create an instance of a Discord client
 const client = new Discord.Client();
 // create a logger instance
@@ -41,10 +43,11 @@ TODO: On guild join, find the first server where the bot can send messages to or
 channel so we can tell users how to use the bot
 TODO: do different things on prod vs. devel booleans
 TODO: update DB to support all of the tables we'll eventually need
+TODO: Cretae a more robust scheduler
 */
 
 client.on('ready', () => {
-    storage.initDB(logger);
+    storage.initDB(logger)
     storage.getAllChannels()
         .then((results) => console.log(results))
     // this is where we should start the intervals of each server by reading a file
@@ -139,6 +142,8 @@ async function channelTest(discordMessage: Discord.Message, args: string[]) {
             } else {
                 // add the user (and the array of 'current' images/the popular results first )
                 storage.addChannelToDB(discordMessage.channel.id);
+                // add them to the scheduler 
+
                 m.edit(createRichEmbed('Info', 'Done! This channel will now receive new e621 popular posts'));
                 //  we need to re-init the scheduler now
             }

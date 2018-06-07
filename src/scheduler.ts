@@ -2,6 +2,19 @@ import * as Discord from 'discord.js';
 import * as storage from './storageController'
 import e621 from 'e621-api';
 
+//TODO: this needs to be more configurable for on the fly adds/removes
+// maybe a global array we push/slice from
+let channelsArray = [];
+
+// this is what a channel on a schedule should look like
+let testObj = {
+    id: 1234,
+    nextCheck: 20000,
+    checkInterval: [],
+
+};
+
+
 export function initScheduler(client: Discord.Client, wrapper: e621) {
     // read the user/channel manifest
     storage.getAllChannels()
@@ -14,6 +27,7 @@ export function initScheduler(client: Discord.Client, wrapper: e621) {
                             let matchedChannel: any = client.channels.get(channel.channel);
                             matchedChannel.send(response[0].file_url);
                         })
+                    // this timing is for debugging
                 }, 20000)
             })
         })
@@ -35,6 +49,7 @@ export function initScheduler(client: Discord.Client, wrapper: e621) {
     // })
 }
 
-function addChannelToScheduler() {
+export function addChannelToScheduler() {
     // add a channel to the scheduler after the bot has already been run
+    console.log('test')
 }
