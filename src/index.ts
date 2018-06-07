@@ -47,7 +47,8 @@ TODO: Cretae a more robust scheduler
 */
 
 client.on('ready', () => {
-    storage.initDB(logger)
+    storage.initDB(logger);
+    // storage.removeChannelFromDB('339847113888497665')
     storage.getAllChannels()
         .then((results) => console.log(results))
     // this is where we should start the intervals of each server by reading a file
@@ -68,10 +69,9 @@ client.on('guildDelete', guild => {
     logger.info(`Bot removed from: ${guild.name} (id: ${guild.id})`);
     client.user.setActivity(`Serving ${client.guilds.size} servers`);
     // flush all channels the guild had registered
-    // THIS NEEDS TO BE TESTED
     guild.channels.forEach((channel) => {
         return storage.removeChannelFromDB(channel.id);
-        // we also need to de-init the scheduler for the cahnnels
+        // TODO: we also need to de-init the scheduler for the cahnnels
     })
 });
 
@@ -121,16 +121,12 @@ client.login(botToken);
 async function channelTest(discordMessage: Discord.Message, args: string[]) {
     /* Pseudocode outline
         get channel ID
-        add channel to stored array
         let the user know the channel has been added
-    
         get the 'inital' set of images for that channel
         add set of images to that user's/channel's cache
         every X minutes, check against each user's cache for new popular items
         (eventually support a blacklist)
     */
-    // get info about the server channel and add it to the array for getting
-    // new e621 updates
     // Send a 'processing' embed
     let infoMessage = createRichEmbed('Info', 'Please wait....');
     const m: any = await discordMessage.channel.send(infoMessage);
@@ -143,9 +139,15 @@ async function channelTest(discordMessage: Discord.Message, args: string[]) {
                 // add the user (and the array of 'current' images/the popular results first )
                 storage.addChannelToDB(discordMessage.channel.id);
                 // add them to the scheduler 
-
+                addChannelToScheduler(client, wrapper, discordMessage.channel.id)
                 m.edit(createRichEmbed('Info', 'Done! This channel will now receive new e621 popular posts'));
                 //  we need to re-init the scheduler now
             }
+        })
+        .catch((error: Error) => {
+            logger.error(error);
+            client.user.sendMessage(JSON.stringify(error.message, null, 2), {
+                reply: adminID
+            });
         });
 }
