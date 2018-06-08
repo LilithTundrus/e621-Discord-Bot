@@ -2,16 +2,22 @@ import * as Discord from 'discord.js';
 import * as storage from './storageController'
 import e621 from 'e621-api';
 
-//TODO: this needs to be more configurable for on the fly adds/removes
+// TODO: this needs to be more configurable for on the fly adds/removes
+// TODO: get this working in a very basic way and move on from there
 // maybe a global array we push/slice from
 let channelsArray = [];
 
 // this is what a channel on a schedule should look like
-let testObj = {
+let schedulerObj = {
     id: 1234,
     nextCheck: 20000,
-    checkInterval: [],
+    previousPostsSet: [],
     blacklistedTags: 'test test2'
+};
+
+let storedObj = {
+    postSet: [],
+    blacklistedTags: []
 };
 
 // TODO: make sure this does nothing if the DB array is empty
@@ -54,6 +60,7 @@ export function addChannelToScheduler(client: Discord.Client, wrapper: e621, cha
     console.log('test')
     wrapper.posts.getPopularPosts(0)
         .then((response) => {
-            storage.updateChannelJSON(channelID, JSON.stringify(response).replace(`'`, `"`))
+            storage.updateChannelJSON(channelID, JSON.stringify(response).replace(`'`, `"`));
+            // add the channel to the scheduler
         })
 }

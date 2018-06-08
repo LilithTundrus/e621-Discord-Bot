@@ -44,6 +44,7 @@ channel so we can tell users how to use the bot
 TODO: do different things on prod vs. devel booleans
 TODO: update DB to support all of the tables we'll eventually need
 TODO: Cretae a more robust scheduler
+TODO: figure out the design for this logically on paper
 */
 
 client.on('ready', () => {
