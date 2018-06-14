@@ -45,6 +45,7 @@ TODO: do different things on prod vs. devel booleans
 TODO: update DB to support all of the tables we'll eventually need
 TODO: Cretae a more robust scheduler
 TODO: figure out the design for this logically on paper
+TODO: Add a 'search' command -- that'd be really useful
 */
 
 client.on('ready', () => {
